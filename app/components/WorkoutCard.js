@@ -33,22 +33,20 @@ export default function WorkoutCard({ workout }) {
           {workout.name}
         </h3>
 
-        <p className="mt-2 text-sm text-gray-500">
-          {workout.equipment}
-        </p>
+        <p className="mt-2 text-sm text-gray-500">{workout.equipment}</p>
 
-        <div className="mt-5 grid grid-cols-3 border-t border-white/10 pt-4">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+        <div className="mt-5 grid grid-cols-1 gap-3 border-t border-white/10 pt-4 sm:grid-cols-3 sm:gap-0">
+          <div className="flex min-w-0 items-center gap-1.5 text-xs text-gray-400">
             <Clock3 size={14} />
             <span>{workout.duration} min</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="flex min-w-0 items-center gap-1.5 text-xs text-gray-400">
             <Flame size={14} />
             <span>{workout.caloriesBurned} kcal</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="flex min-w-0 items-center gap-1.5 text-xs text-gray-400">
             <Star size={14} />
             <span>{workout.rating}</span>
           </div>
