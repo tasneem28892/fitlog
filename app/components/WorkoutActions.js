@@ -1,30 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Bookmark } from "lucide-react";
 import { addToPlan, addToSaved } from "../../lib/storage";
 
 export default function WorkoutActions({ workout }) {
   const [message, setMessage] = useState("");
+  const timeoutRef = useRef(null);
 
-  const handlePlan = () => {
-    const result = addToPlan(workout);
+  const showToast = (text) => {
+    setMessage(text);
 
-    setMessage(result.message);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setMessage("");
     }, 2500);
   };
 
+  const handlePlan = () => {
+    const result = addToPlan(workout);
+    showToast(result.message);
+  };
+
   const handleSaved = () => {
     const result = addToSaved(workout);
-
-    setMessage(result.message);
-
-    setTimeout(() => {
-      setMessage("");
-    }, 2500);
+    showToast(result.message);
   };
 
   return (
