@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Trash2 } from "lucide-react";
-import { getPlan, getSaved, savePlan, saveSaved } from "../../lib/storage";
+import { ArrowLeft, Check, Trash2, Clock3, Flame, Star } from "lucide-react";
+import {
+  getPlan,
+  getSaved,
+  savePlan,
+  saveSaved,
+} from "../../lib/storage";
 
 export default function MyPlan() {
   const [activeTab, setActiveTab] = useState("plan");
   const [plan, setPlan] = useState([]);
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const loadData = () => {
@@ -21,6 +28,18 @@ export default function MyPlan() {
     loadData();
   }, []);
 
+  const showToast = (text) => {
+    setMessage(text);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setMessage("");
+    }, 2500);
+  };
+
   const removeFromPlan = (id) => {
     const updated = plan.filter(
       (workout) => String(workout.id) !== String(id)
@@ -28,6 +47,7 @@ export default function MyPlan() {
 
     setPlan(updated);
     savePlan(updated);
+    showToast("Workout removed from today's plan.");
   };
 
   const removeFromSaved = (id) => {
@@ -37,6 +57,7 @@ export default function MyPlan() {
 
     setSaved(updated);
     saveSaved(updated);
+    showToast("Workout removed from saved.");
   };
 
   const markAsDone = (id) => {
@@ -46,6 +67,7 @@ export default function MyPlan() {
 
     setPlan(updated);
     savePlan(updated);
+    showToast("Workout marked as done.");
   };
 
   const currentList = activeTab === "plan" ? plan : saved;
@@ -98,8 +120,7 @@ export default function MyPlan() {
           </h1>
 
           <p className="mt-4 max-w-xl text-sm leading-6 text-gray-500">
-            Build your training plan, track your saved workouts, and keep
-            today&apos;s session focused.
+            Cap of five lifts for today. Finish them, then load more.
           </p>
         </div>
 
@@ -167,7 +188,7 @@ export default function MyPlan() {
           <div className="flex min-h-[350px] items-center justify-center">
             <div className="text-center">
               <h2 className="text-2xl font-black uppercase">
-                Nothing here yet
+                NOTHING HERE YET
               </h2>
 
               <p className="mt-3 text-sm text-gray-500">
@@ -198,6 +219,7 @@ export default function MyPlan() {
                 />
 
                 <div className="p-5">
+
                   <div className="flex flex-wrap gap-2">
                     {workout.muscleGroups?.map((group) => (
                       <span
@@ -213,11 +235,56 @@ export default function MyPlan() {
                     {workout.name}
                   </h3>
 
-                  <p className="mt-2 text-sm text-gray-500">
-                    {workout.duration} min · {workout.caloriesBurned} kcal
+                  <p className="mt-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Equipment
                   </p>
 
+                  <p className="mt-1 text-sm font-bold text-white">
+                    {workout.equipment}
+                  </p>
+
+                  <div className="mt-5 grid grid-cols-3 border-y border-white/10 py-4">
+
+                    <div className="flex items-center gap-2">
+                      <Clock3 size={15} className="text-[#ccff00]" />
+                      <div>
+                        <p className="text-[10px] uppercase text-gray-500">
+                          Duration
+                        </p>
+                        <p className="text-xs font-bold">
+                          {workout.duration} min
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Flame size={15} className="text-[#ccff00]" />
+                      <div>
+                        <p className="text-[10px] uppercase text-gray-500">
+                          Calories
+                        </p>
+                        <p className="text-xs font-bold">
+                          {workout.caloriesBurned} kcal
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Star size={15} className="text-[#ccff00]" />
+                      <div>
+                        <p className="text-[10px] uppercase text-gray-500">
+                          Rating
+                        </p>
+                        <p className="text-xs font-bold">
+                          {workout.rating}
+                        </p>
+                      </div>
+                    </div>
+
+                  </div>
+
                   <div className="mt-5 flex gap-2">
+
                     <Link
                       href={`/workout/${workout.id}`}
                       className="flex-1 border border-white/20 px-3 py-3 text-center text-xs font-black uppercase transition hover:border-[#ccff00] hover:text-[#ccff00]"
@@ -230,7 +297,7 @@ export default function MyPlan() {
                         <button
                           type="button"
                           onClick={() => markAsDone(workout.id)}
-                          className="flex items-center justify-center border border-[#ccff00] px-3 text-[#ccff00]"
+                          className="flex items-center justify-center border border-[#ccff00] px-3 text-[#ccff00] transition hover:bg-[#ccff00] hover:text-black"
                           title="Mark as done"
                         >
                           <Check size={16} />
@@ -239,7 +306,7 @@ export default function MyPlan() {
                         <button
                           type="button"
                           onClick={() => removeFromPlan(workout.id)}
-                          className="flex items-center justify-center border border-white/20 px-3 text-gray-400 hover:text-red-400"
+                          className="flex items-center justify-center border border-white/20 px-3 text-gray-400 transition hover:border-red-400 hover:text-red-400"
                           title="Remove"
                         >
                           <Trash2 size={16} />
@@ -249,12 +316,13 @@ export default function MyPlan() {
                       <button
                         type="button"
                         onClick={() => removeFromSaved(workout.id)}
-                        className="flex items-center justify-center border border-white/20 px-3 text-gray-400 hover:text-red-400"
+                        className="flex items-center justify-center border border-white/20 px-3 text-gray-400 transition hover:border-red-400 hover:text-red-400"
                         title="Remove"
                       >
                         <Trash2 size={16} />
                       </button>
                     )}
+
                   </div>
                 </div>
               </div>
@@ -263,6 +331,12 @@ export default function MyPlan() {
         )}
 
       </div>
+
+      {message && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-[#ccff00]/30 bg-[#111318] px-5 py-3 text-sm font-bold text-[#ccff00] shadow-xl">
+          {message}
+        </div>
+      )}
     </main>
   );
 }
